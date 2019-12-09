@@ -1,0 +1,98 @@
+# Advent of Code 2019
+# Day 3: Crossed Wires
+
+import matplotlib.pyplot as plt
+from matplotlib.path import Path
+import matplotlib.patches as patches
+import matplotlib.patheffects as path_effects
+
+file = open('wire1.txt')
+wire1 = file.read()
+wire1 = wire1.split(',')
+file.close()
+
+file2 = open('wire2.txt')
+wire2 = file2.read()
+wire2 = wire2.split(',')
+file2.close()
+
+file3 = open('gridInput.txt')
+gridInput = file3.read()
+gridInput = gridInput.split(',')
+file3.close()
+
+rightDirection = lambda xCord, rDir : xCord + rDir
+leftDirection = lambda xCord, lDir : xCord - lDir
+upDirection = lambda yCord, uDir : yCord + uDir
+downDirection = lambda yCord, dDir : yCord - dDir
+
+wire1_coordinateList = list()
+wire1_inputDirList = list()
+wire2_coordinateList = list()
+wire2_inputDirList = list()
+coordinateList = list()
+xListMaster = list()
+yListMaster = list()
+xListW1 = list()
+yListW1 = list()
+xListW2 = list()
+yListW2 = list()
+
+for ix in wire1:
+    wire1_inputDirList.append(int(ix[1:]))
+
+
+for iy in wire2:
+    wire2_inputDirList.append(int(iy[1:]))
+
+
+def vertexCalculator(inputList,outputCoordinates,xList,yList):
+    xStart = 0
+    yStart = 0
+    for i in inputList:
+        inputDir = int(i[1:])
+        if i[0] == 'R':
+            xStart = rightDirection(xStart,inputDir)
+        elif i[0] == 'L':
+            xStart = leftDirection(xStart,inputDir)
+        elif i[0] == 'U':
+            yStart = upDirection(yStart,inputDir)
+        elif i[0] == 'D':
+            yStart = downDirection(yStart,inputDir)
+        xList.append(float(xStart))
+        yList.append(float(yStart))
+        coordStr = float(xStart),float(yStart)
+        outputCoordinates.append(coordStr)
+
+vertexCalculator(gridInput,coordinateList,xListMaster,yListMaster)
+vertexCalculator(wire1,wire1_coordinateList,xListW1,yListW1)
+vertexCalculator(wire2,wire2_coordinateList,xListW2,yListW2)
+
+codes = list([Path.MOVETO])
+for ii in range(len(wire1_coordinateList) - 1):
+    codes.append(Path.LINETO)
+
+codes2 = list([Path.MOVETO])
+for ii in range(len(wire2_coordinateList) - 1):
+    codes2.append(Path.LINETO)
+
+def manhattanDistanceCalculator(x1,y1,x2,y2):
+    manhattanDistance = (abs(x1 - x2) + abs(y1 - y2))
+    print(manhattanDistance)
+
+manhattanDistanceCalculator(0,0,6491,1524)
+
+path = Path(wire1_coordinateList,codes)
+path2 = Path(wire2_coordinateList,codes2)
+
+fig, ax = plt.subplots()
+patch = patches.PathPatch(path,facecolor='none',edgecolor='purple',lw=3,joinstyle='round')
+patch2 = patches.PathPatch(path2,facecolor='none',edgecolor='orange',lw=3,joinstyle='round')
+ax.add_patch(patch)
+ax.add_patch(patch2)
+ax.set_xlim(-10000,25000)
+ax.set_ylim(-10000,10000)
+
+plt.plot(xListW1,yListW1,'bo',linewidth=1)
+plt.plot(xListW2,yListW2,'ro',linewidth=1)
+plt.show()
